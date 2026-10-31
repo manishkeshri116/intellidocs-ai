@@ -41,7 +41,7 @@ export function UploadDropzone({ onUploaded }: { onUploaded: () => void }) {
 
   return (
     <div
-      className={`rounded-2xl border border-dashed px-5 py-7 text-center transition ${dragging ? "border-brand bg-brand-soft" : "border-[#d7ddd9] bg-[#fbfcfb]"}`}
+      className={`upload-dropzone rounded-2xl border border-dashed px-5 py-7 text-center transition ${dragging ? "is-dragging" : ""}`}
       onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
       onDrop={(event) => { event.preventDefault(); setDragging(false); void upload(event.dataTransfer.files[0]); }}

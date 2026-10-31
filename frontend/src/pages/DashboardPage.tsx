@@ -8,7 +8,7 @@ import { Button, EmptyState, ErrorNotice, FileBadge, formatDate, PageHeader, Spi
 import { documentsApi, getErrorMessage } from "../lib/api";
 import type { DocumentItem, DocumentListResponse } from "../types";
 
-const chartColors = ["#476c5b", "#7d9e8c", "#b2c7ba", "#dce7df"];
+const chartColors = ["#6459d6", "#938be8", "#bdb8f1", "#e2dffc"];
 
 function useDocuments() {
   const [data, setData] = useState<DocumentListResponse | null>(null);
@@ -28,7 +28,7 @@ function useDocuments() {
 function DocumentRows({ documents }: { documents: DocumentItem[] }) {
   return <div className="divide-y divide-line">
     {documents.map((doc) => (
-      <Link key={doc.id} to={`/documents/${doc.id}`} className="flex items-center gap-3 px-5 py-4 transition hover:bg-[#fbfcfb]">
+      <Link key={doc.id} to={`/documents/${doc.id}`} className="flex items-center gap-3 px-5 py-4 transition hover:bg-[#f8f7ff]">
         <FileBadge type={doc.file_type} />
         <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-ink">{doc.filename}</p><p className="mt-1 text-xs text-muted">Added {formatDate(doc.created_at)}</p></div>
         {doc.summary_available && <span className="hidden rounded-full bg-brand-soft px-2.5 py-1 text-[11px] font-medium text-brand sm:inline">Summary ready</span>}

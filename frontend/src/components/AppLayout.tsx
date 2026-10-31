@@ -97,18 +97,18 @@ export function AppLayout() {
   }
 
   const sidebar = (
-    <aside className="flex h-full flex-col border-r border-line bg-white">
+    <aside className="workspace-sidebar flex h-full flex-col border-r">
       <div className="flex h-[72px] items-center gap-3 border-b border-line px-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white"><BookOpen size={19} /></div>
-        <div><p className="text-[15px] font-bold tracking-tight text-ink">IntelliDocs</p><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-muted">AI workspace</p></div>
-        <button className="ml-auto rounded-lg p-2 text-muted hover:bg-canvas lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close menu"><X size={18} /></button>
+        <div className="sidebar-brand-mark flex h-9 w-9 items-center justify-center rounded-xl text-white"><BookOpen size={19} /></div>
+        <div><p className="text-[15px] font-bold tracking-tight text-white">IntelliDocs</p><p className="sidebar-subtitle text-[10px] font-semibold uppercase tracking-[.14em]">AI workspace</p></div>
+        <button className="sidebar-icon-button ml-auto rounded-lg p-2 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close menu"><X size={18} /></button>
       </div>
       <div className="px-4 pt-7">
-        <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.14em] text-[#a2aab2]">Workspace</p>
+        <p className="sidebar-section-label mb-3 px-3 text-[10px] font-bold uppercase tracking-[.14em]">Workspace</p>
         <nav className="space-y-1">
           {navigation.map(({ label, to, icon: Icon }) => (
             <NavLink key={to} to={to} end={to === "/"} onClick={() => setMobileOpen(false)}
-              className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition ${isActive ? "bg-brand-soft text-brand" : "text-[#65717d] hover:bg-gray-50 hover:text-ink"}`}>
+              className={({ isActive }) => `sidebar-nav-link flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition ${isActive ? "is-active" : ""}`}>
               <Icon size={17} strokeWidth={1.8} />{label}
             </NavLink>
           ))}
@@ -116,31 +116,31 @@ export function AppLayout() {
       </div>
       <div className="mt-7 px-4">
         <div className="mb-2 flex items-center justify-between px-3">
-          <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#a2aab2]">General chat</p>
-          <button onClick={() => navigate("/chat")} title="New chat" aria-label="Start a new general chat" className="rounded-md p-1 text-muted hover:bg-canvas hover:text-brand"><Plus size={16} /></button>
+          <p className="sidebar-section-label text-[10px] font-bold uppercase tracking-[.14em]">General chat</p>
+          <button onClick={() => navigate("/chat")} title="New chat" aria-label="Start a new general chat" className="sidebar-icon-button rounded-md p-1"><Plus size={16} /></button>
         </div>
-        {chatListError && <p role="alert" className="px-3 py-2 text-[11px] leading-4 text-red-600">{chatListError}<button onClick={() => void refreshChats()} className="ml-1 font-semibold underline">Retry</button></p>}
-        {chatActionMessage && <p role="status" className={`px-3 py-1 text-[11px] leading-4 ${chatActionMessage.startsWith("Conversation deleted") || chatActionMessage.startsWith("All chat") ? "text-brand" : "text-red-600"}`}>{chatActionMessage}</p>}
-        {chatListLoading ? <p className="flex items-center gap-2 px-3 py-2 text-xs text-muted"><LoaderCircle size={13} className="animate-spin" />Loading chats…</p>
+        {chatListError && <p role="alert" className="px-3 py-2 text-[11px] leading-4 text-rose-300">{chatListError}<button onClick={() => void refreshChats()} className="ml-1 font-semibold underline">Retry</button></p>}
+        {chatActionMessage && <p role="status" className={`px-3 py-1 text-[11px] leading-4 ${chatActionMessage.startsWith("Conversation deleted") || chatActionMessage.startsWith("All chat") ? "text-[#b8b2ff]" : "text-rose-300"}`}>{chatActionMessage}</p>}
+        {chatListLoading ? <p className="flex items-center gap-2 px-3 py-2 text-xs text-[#9ba4b8]"><LoaderCircle size={13} className="animate-spin" />Loading chats…</p>
           : generalChats.length ? <nav className="max-h-[28vh] space-y-0.5 overflow-y-auto">
             {generalChats.map((conversation) => (
               <div key={conversation.id} className="group flex items-center gap-1">
                 <NavLink to={`/chat/${conversation.id}`} onClick={() => setMobileOpen(false)}
-                  className={({ isActive }) => `min-w-0 flex-1 truncate rounded-lg px-3 py-2 text-xs transition ${isActive ? "bg-brand-soft font-medium text-brand" : "text-[#65717d] hover:bg-gray-50 hover:text-ink"}`}>
+                  className={({ isActive }) => `sidebar-chat-link min-w-0 flex-1 truncate rounded-lg px-3 py-2 text-xs transition ${isActive ? "is-active font-medium" : ""}`}>
                   {conversation.title}
                 </NavLink>
-                <button onClick={() => requestDeleteConversation(conversation)} aria-label={`Delete ${conversation.title}`} title="Delete conversation" className="rounded-md p-1.5 text-muted opacity-0 transition hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100"><Trash2 size={13} /></button>
+                <button onClick={() => requestDeleteConversation(conversation)} aria-label={`Delete ${conversation.title}`} title="Delete conversation" className="sidebar-icon-button rounded-md p-1.5 opacity-0 transition focus:opacity-100 group-hover:opacity-100"><Trash2 size={13} /></button>
               </div>
             ))}
-          </nav> : !chatListError && <p className="px-3 py-2 text-xs leading-5 text-muted">Your conversations will appear here.</p>}
-        {generalChats.length > 0 && <button onClick={requestDeleteAllConversations} className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[11px] font-medium text-muted hover:bg-red-50 hover:text-red-600"><Trash2 size={13} />Delete all chats</button>}
-        <button onClick={() => { setMobileOpen(false); navigate("/chat"); }} className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium text-brand hover:bg-brand-soft"><Plus size={14} />New chat</button>
+          </nav> : !chatListError && <p className="px-3 py-2 text-xs leading-5 text-[#8992a8]">Your conversations will appear here.</p>}
+        {generalChats.length > 0 && <button onClick={requestDeleteAllConversations} className="sidebar-chat-link mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[11px] font-medium"><Trash2 size={13} />Delete all chats</button>}
+        <button onClick={() => { setMobileOpen(false); navigate("/chat"); }} className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-semibold text-[#c6c1ff] transition hover:bg-white/5"><Plus size={14} />New chat</button>
       </div>
-      <div className="mt-auto border-t border-line p-4">
+      <div className="sidebar-profile-border mt-auto border-t p-4">
         <div className="flex items-center gap-3 rounded-xl px-2 py-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e7eee9] text-xs font-bold text-brand">{initials}</div>
-          <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-ink">{user?.full_name}</p><p className="truncate text-xs text-muted">{user?.email}</p></div>
-          <button onClick={signOut} title="Log out" className="rounded-lg p-2 text-muted hover:bg-gray-100 hover:text-ink"><LogOut size={16} /></button>
+          <div className="sidebar-avatar flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold">{initials}</div>
+          <div className="min-w-0 flex-1"><p className="sidebar-profile-name truncate text-sm font-semibold">{user?.full_name}</p><p className="sidebar-profile-email truncate text-xs">{user?.email}</p></div>
+          <button onClick={signOut} title="Log out" className="sidebar-icon-button rounded-lg p-2"><LogOut size={16} /></button>
         </div>
       </div>
     </aside>
@@ -151,12 +151,12 @@ export function AppLayout() {
       <div className="fixed inset-y-0 left-0 z-30 hidden w-[248px] lg:block">{sidebar}</div>
       {mobileOpen && <div className="fixed inset-0 z-40 lg:hidden"><button aria-label="Close navigation" className="absolute inset-0 bg-ink/30" onClick={() => setMobileOpen(false)} /><div className="relative h-full w-[280px]">{sidebar}</div></div>}
       <div className="lg:pl-[248px]">
-        <header className="sticky top-0 z-20 flex h-[72px] items-center border-b border-line bg-white/95 px-5 backdrop-blur md:px-8">
-          <button className="mr-3 rounded-lg p-2 text-muted hover:bg-canvas lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu size={19} /></button>
+        <header className="workspace-topbar sticky top-0 z-20 flex h-[72px] items-center border-b px-5 md:px-8">
+          <button className="mr-3 rounded-lg p-2 text-muted transition hover:bg-canvas hover:text-ink lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu size={19} /></button>
           <p className="text-sm font-semibold text-ink">{activeTitle}</p>
           <div className="ml-auto text-xs text-muted">Document intelligence workspace</div>
         </header>
-        <main className="mx-auto max-w-[1440px] px-5 py-7 md:px-8 md:py-9"><Outlet /></main>
+        <main className="workspace-content mx-auto max-w-[1440px] px-5 py-7 md:px-8 md:py-9"><Outlet /></main>
       </div>
       {deleteTarget && <div
         className="fixed inset-0 z-50 flex items-center justify-center bg-[#17212b]/40 px-4 py-6 backdrop-blur-[2px]"

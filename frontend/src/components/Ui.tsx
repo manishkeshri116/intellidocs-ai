@@ -8,8 +8,8 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "ghost" | "danger" }) {
   const variants = {
-    primary: "bg-brand text-white hover:bg-brand-dark disabled:bg-brand/50",
-    secondary: "border border-line bg-white text-ink hover:bg-gray-50 disabled:opacity-50",
+    primary: "button-primary text-white disabled:opacity-55",
+    secondary: "button-secondary border border-line bg-white text-ink disabled:opacity-50",
     ghost: "text-muted hover:bg-gray-100 hover:text-ink",
     danger: "text-red-600 hover:bg-red-50",
   };

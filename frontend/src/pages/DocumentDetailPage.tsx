@@ -99,7 +99,7 @@ export function DocumentDetailPage() {
     {tab === "overview" ? <div className="grid gap-5 xl:grid-cols-[1.4fr_.8fr]">
       <section className="min-h-[380px] rounded-2xl border border-line bg-white p-5 shadow-soft sm:p-6">
         <div className="flex items-center justify-between"><div><h2 className="text-sm font-semibold text-ink">Document preview</h2><p className="mt-1 text-xs text-muted">File information from your workspace</p></div><FileText size={18} className="text-muted" /></div>
-        <div className="mt-6 flex min-h-[270px] flex-col items-center justify-center rounded-xl border border-dashed border-line bg-[#fbfcfb] px-6 text-center">
+        <div className="mt-6 flex min-h-[270px] flex-col items-center justify-center rounded-xl border border-dashed border-line bg-[#f8f7ff] px-6 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-brand"><FileBadge type={document.file_type} /></div>
           <h3 className="mt-4 max-w-md break-all text-sm font-semibold text-ink">{document.filename}</h3>
           <p className="mt-2 max-w-md text-sm leading-6 text-muted">
@@ -132,7 +132,7 @@ export function DocumentDetailPage() {
 
 export function AnswerPanel({ answer }: { answer: AskResponse }) {
   return <div className="space-y-5">
-    <div className="rounded-2xl bg-[#f7f8f6] p-4 sm:p-5"><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">You asked</p><p className="text-sm font-medium leading-6 text-ink">{answer.question}</p></div>
+    <div className="rounded-2xl bg-[#f5f4fc] p-4 sm:p-5"><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">You asked</p><p className="text-sm font-medium leading-6 text-ink">{answer.question}</p></div>
     <div><div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-brand"><Sparkles size={14} />AI response</div><p className="whitespace-pre-wrap text-sm leading-7 text-[#46525d]">{answer.answer}</p></div>
     <div className="border-t border-line pt-4"><div className="mb-3 flex items-center justify-between"><h3 className="text-xs font-semibold uppercase tracking-wide text-muted">Retrieved sources</h3><span className="text-xs text-muted">{answer.sources.length} {answer.sources.length === 1 ? "source" : "sources"}</span></div>
       {answer.sources.length ? <div className="grid gap-3 md:grid-cols-2">{answer.sources.map((source, index) => <div key={`${source.page_number}-${index}`} className="rounded-xl border border-line p-4"><div className="mb-2 flex items-center justify-between"><span className="rounded-md bg-brand-soft px-2 py-1 text-[11px] font-semibold text-brand">Page {source.page_number}</span><span className="text-[11px] text-muted">Match {(source.similarity_score * 100).toFixed(0)}%</span></div><p className="line-clamp-5 whitespace-pre-wrap text-xs leading-5 text-[#65717d]">{source.content}</p></div>)}</div> : <p className="text-sm text-muted">No source excerpts were returned for this answer.</p>}

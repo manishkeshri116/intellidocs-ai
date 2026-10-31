@@ -6,13 +6,13 @@ import { getErrorMessage } from "../lib/api";
 import { Button } from "../components/Ui";
 
 function AuthShell({ children }: { children: React.ReactNode }) {
-  return <main className="flex min-h-screen items-center justify-center bg-[#f7f8f6] px-5 py-10">
+  return <main className="auth-shell flex min-h-screen items-center justify-center px-5 py-10">
     <div className="w-full max-w-[420px]">
       <Link to="/" className="mb-8 flex items-center justify-center gap-2.5">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white"><BookOpen size={20} /></span>
+        <span className="auth-brand-mark flex h-10 w-10 items-center justify-center rounded-xl text-white"><BookOpen size={20} /></span>
         <span className="text-lg font-bold tracking-tight text-ink">IntelliDocs <span className="font-medium text-brand">AI</span></span>
       </Link>
-      <section className="rounded-2xl border border-line bg-white p-7 shadow-soft sm:p-9">{children}</section>
+      <section className="auth-card rounded-2xl border border-white/80 bg-white/95 p-7 backdrop-blur sm:p-9">{children}</section>
       <p className="mt-6 text-center text-xs text-muted">Your documents stay in your secure workspace.</p>
     </div>
   </main>;

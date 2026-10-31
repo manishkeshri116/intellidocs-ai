@@ -39,7 +39,7 @@ export function ChatAttachmentPicker({
         }}
       />
       {attachments.length > 0 && <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {attachments.map((attachment) => <article key={attachment.id} className="relative min-w-0 overflow-hidden rounded-xl border border-line bg-[#fbfcfb]">
+        {attachments.map((attachment) => <article key={attachment.id} className="relative min-w-0 overflow-hidden rounded-xl border border-line bg-[#faf9ff]">
           {attachment.kind === "image" && attachment.previewUrl
             ? <img src={attachment.previewUrl} alt={attachment.file.name} className="h-24 w-full bg-[#eef0f2] object-cover" />
             : <div className="flex h-24 items-center justify-center bg-[#f7f8fa] text-rose-600"><FileText size={28} strokeWidth={1.6} /></div>}

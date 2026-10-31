@@ -175,7 +175,7 @@ export function GeneralChatPage() {
       {isDragging && <div className="pointer-events-none absolute inset-3 z-30 flex items-center justify-center rounded-2xl border-2 border-dashed border-brand bg-white/90">
         <div className="text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-brand"><MessageCircle size={22} /></div><p className="mt-3 text-sm font-semibold text-ink">Drop files to attach</p><p className="mt-1 text-xs text-muted">PDF, JPG, PNG or WEBP</p></div>
       </div>}
-      <header className="flex items-center justify-between border-b border-line px-4 py-3.5 sm:px-6">
+      <header className="chat-panel-header flex items-center justify-between border-b border-line px-4 py-3.5 sm:px-6">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand"><MessageCircle size={18} /></div>
           <div><h1 className="text-sm font-semibold text-ink">General AI chat</h1><p className="mt-0.5 text-xs text-muted">Ask anything, independent of your documents</p></div>
@@ -191,14 +191,14 @@ export function GeneralChatPage() {
             <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-[28px]">What would you like to explore?</h2>
             <p className="mt-2 max-w-md text-sm leading-6 text-muted">Start a conversation on any topic. General AI chat is separate from questions about your documents.</p>
             <div className="mt-7 grid w-full max-w-[610px] gap-2 sm:grid-cols-2">
-              {suggestions.map((suggestion) => <button key={suggestion} onClick={() => { setDraft(suggestion); inputRef.current?.focus(); }} className="rounded-xl border border-line px-4 py-3 text-left text-xs font-medium text-[#586571] transition hover:border-brand/40 hover:bg-[#fbfcfb] hover:text-brand">{suggestion}</button>)}
+              {suggestions.map((suggestion) => <button key={suggestion} onClick={() => { setDraft(suggestion); inputRef.current?.focus(); }} className="chat-suggestion rounded-xl border border-line px-4 py-3 text-left text-xs font-medium text-[#586571] transition">{suggestion}</button>)}
             </div>
           </div> : <div className="space-y-7">
             {messages.map((message) => <article key={message.id} className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : ""}`}>
               <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${message.role === "assistant" ? "bg-brand text-white" : "bg-[#eef0f2] text-[#65717d]"}`}>
                 {message.role === "assistant" ? <Bot size={16} /> : <UserRound size={16} />}
               </div>
-              <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-7 ${message.role === "assistant" ? "bg-[#f7f8f6] text-[#34414b]" : "bg-brand text-white"}`}>
+              <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-7 ${message.role === "assistant" ? "bg-[#f4f3fc] text-[#34414b]" : "chat-message-user text-white"}`}>
                 {message.attachments?.length ? <div className="mb-2 flex flex-wrap gap-2">{message.attachments.map((file, index) => <div key={`${file.filename}-${index}`} className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs ${message.role === "assistant" ? "bg-white" : "bg-white/15"}`}><FileText size={14} /><span className="max-w-40 truncate">{file.filename}</span>{file.size !== undefined && <span className="opacity-75">{formatFileSize(file.size)}</span>}</div>)}</div> : null}
                 <p className="whitespace-pre-wrap">{message.content}</p>
               </div>
@@ -208,14 +208,14 @@ export function GeneralChatPage() {
         </div>
       </div>
 
-      <div className="border-t border-line bg-white px-3 py-3 sm:px-6 sm:py-4">
+      <div className="chat-composer-area border-t border-line px-3 py-3 sm:px-6 sm:py-4">
         <div className="mx-auto max-w-[800px]">
           {notice && <div role="alert" className="mb-3 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs text-red-700">{notice}</div>}
           {isLoading && attachments.length > 0 && uploadProgress !== null && <div role="status" className="mb-3 flex items-center gap-3 text-xs text-muted">
             <span className="shrink-0">{uploadProgress < 100 ? `Uploading files ${uploadProgress}%` : "Files uploaded · generating response…"}</span>
-            <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#e9edea]"><span className="block h-full rounded-full bg-brand transition-all" style={{ width: `${uploadProgress}%` }} /></span>
+            <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#e9e8f4]"><span className="block h-full rounded-full bg-brand transition-all" style={{ width: `${uploadProgress}%` }} /></span>
           </div>}
-          <form onSubmit={(event) => void submitMessage(event)} className="rounded-2xl border border-[#dfe4e1] bg-white p-2 shadow-[0_4px_18px_rgba(27,39,32,.07)] transition focus-within:border-[#9bb2a3] focus-within:ring-4 focus-within:ring-brand/5">
+          <form onSubmit={(event) => void submitMessage(event)} className="chat-composer rounded-2xl border bg-white p-2 transition">
             <textarea
               ref={inputRef}
               value={draft}
@@ -239,7 +239,7 @@ export function GeneralChatPage() {
               <p className="text-[11px] text-muted">{attachments.length ? `${attachments.length} attachment${attachments.length === 1 ? "" : "s"} · ready to send` : "General AI chat"}</p>
               <div className="flex items-center gap-2">
                 <span className="hidden text-[10px] text-[#9aa3aa] sm:inline">Enter to send · Shift + Enter for a new line</span>
-                <button type="submit" disabled={!draft.trim() || isLoading || isConversationLoading} aria-label="Send message" title="Send message" className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-[#d4ddd7]">
+                <button type="submit" disabled={!draft.trim() || isLoading || isConversationLoading} aria-label="Send message" title="Send message" className="chat-send-button flex h-9 w-9 items-center justify-center rounded-xl text-white transition disabled:cursor-not-allowed">
                   {isLoading ? <LoaderCircle size={16} className="animate-spin" /> : <ArrowUp size={17} />}
                 </button>
               </div>
