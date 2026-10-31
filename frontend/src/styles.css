@@ -1,0 +1,61 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Inter", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  color: #17212b;
+  background: #f7f8fa;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+
+.field {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #e3e7ea;
+  border-radius: 11px;
+  background-color: #fff;
+  padding: 10px 13px;
+  color: #17212b;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.field::placeholder { color: #a0a8af; }
+.field:focus { border-color: #789585; box-shadow: 0 0 0 3px rgba(71, 108, 91, .1); }
+.field:disabled { cursor: not-allowed; background: #f7f8fa; }
+
+.tab-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid transparent;
+  padding: 10px 13px;
+  color: #77818d;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tab-button-active { border-color: #476c5b; color: #476c5b; }
+
+.general-chat-shell {
+  height: calc(100dvh - 128px);
+  min-height: 480px;
+}
+
+@media (max-width: 640px) {
+  .general-chat-shell {
+    height: calc(100dvh - 118px);
+    min-height: 440px;
+  }
+}

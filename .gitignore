@@ -1,0 +1,28 @@
+# Environment files and secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python
+**/__pycache__/
+*.py[cod]
+**/.venv/
+backend/venv/
+.pytest_cache/
+
+# Runtime data and local databases
+backend/uploads/
+*.db
+*.sqlite
+*.sqlite3
+
+# Node and build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
