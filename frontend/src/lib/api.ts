@@ -1,4 +1,5 @@
 import axios from "axios";
+import { logger } from "./logger";
 import type {
   AskResponse,
   DocumentDetail,
@@ -24,7 +25,21 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const url = typeof error.config?.url === "string" ? error.config.url.split("?")[0] : "";
+    const category = url.startsWith("/auth/") ? "authentication"
+      : url.includes("/documents/") ? (url.endsWith("/upload") ? "document-upload" : "document-processing")
+      : url.startsWith("/chat") || url.startsWith("/chat-history") ? "chat"
+      : null;
+
+    if (category && (status === undefined || status >= 400)) {
+      logger.captureException(error, {
+        category,
+        ...(status === undefined ? {} : { status }),
+      });
+    }
+
+    if (status === 401) {
       localStorage.removeItem(TOKEN_KEY);
       window.dispatchEvent(new Event("intellidocs:unauthorized"));
     }
@@ -34,6 +49,9 @@ api.interceptors.response.use(
 
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
+    if (error.response && error.response.status >= 500) {
+      return "The service couldn’t complete your request. Please try again.";
+    }
     const detail = error.response?.data?.detail;
     if (typeof detail === "string") return detail;
     if (error.code === "ECONNABORTED") return "The request timed out. Please try again.";

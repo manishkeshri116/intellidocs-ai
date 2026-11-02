@@ -1,4 +1,5 @@
 
+import logging
 import os
 import uuid
 
@@ -12,6 +13,7 @@ from fastapi import (
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.logging import log_exception
 from app.core.security import get_current_user
 
 from app.models.document import Document
@@ -40,6 +42,7 @@ router = APIRouter(
     prefix="/documents",
     tags=["Documents"]
 )
+logger = logging.getLogger("app.documents")
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -104,6 +107,19 @@ async def upload_document(
         db.commit()
         db.refresh(document)
 
+        logger.info(
+            "Document uploaded and indexed",
+            extra={
+                "event": "document_upload_succeeded",
+                "operation": "upload",
+                "entity_type": "document",
+                "entity_id": document.id,
+                "file_type": extension.lstrip("."),
+                "file_size_bytes": getattr(file, "size", None),
+                "page_count": len(pages),
+                "chunk_count": total_chunks,
+            },
+        )
         return {
             "message": "Document uploaded successfully",
             "document_id": document.id,
@@ -111,13 +127,21 @@ async def upload_document(
             "total_chunks": total_chunks
         }
 
-    except Exception as e:
+    except Exception as error:
         db.rollback()
 
         if os.path.exists(file_path):
             os.remove(file_path)
 
-        print("DOCUMENT UPLOAD ERROR:", repr(e))
+        log_exception(
+            logger,
+            "Document upload failed",
+            error,
+            event="document_upload_failed",
+            operation="upload",
+            file_type=extension.lstrip("."),
+            file_size_bytes=getattr(file, "size", None),
+        )
 
         raise HTTPException(
             status_code=500,
@@ -147,6 +171,15 @@ def generate_summary(
         )
 
     if document.summary:
+        logger.info(
+            "Returning cached document summary",
+            extra={
+                "event": "document_summary_cache_hit",
+                "operation": "summary",
+                "entity_type": "document",
+                "entity_id": document.id,
+            },
+        )
         return {
             "document_id": document.id,
             "summary": document.summary,
@@ -169,16 +202,33 @@ def generate_summary(
         db.commit()
         db.refresh(document)
 
+        logger.info(
+            "Document summary generated",
+            extra={
+                "event": "document_summary_succeeded",
+                "operation": "summary",
+                "entity_type": "document",
+                "entity_id": document.id,
+            },
+        )
         return {
             "document_id": document.id,
             "summary": summary,
             "cached": False
         }
 
-    except Exception as e:
+    except Exception as error:
         db.rollback()
 
-        print("SUMMARY ERROR:", repr(e))
+        log_exception(
+            logger,
+            "Document summary generation failed",
+            error,
+            event="document_summary_failed",
+            operation="summary",
+            entity_type="document",
+            entity_id=document.id,
+        )
 
         raise HTTPException(
             status_code=502,
@@ -250,6 +300,16 @@ def ask_document(
             for item in relevant_chunks
         ]
 
+        logger.info(
+            "Document question answered",
+            extra={
+                "event": "document_rag_succeeded",
+                "operation": "rag_question",
+                "entity_type": "document",
+                "entity_id": document.id,
+                "chunk_count": len(relevant_chunks),
+            },
+        )
         return DocumentQuestionResponse(
             document_id=document.id,
             question=request.question,
@@ -260,8 +320,16 @@ def ask_document(
     except HTTPException:
         raise
 
-    except Exception as e:
-        print("RAG Q&A ERROR:", repr(e))
+    except Exception as error:
+        log_exception(
+            logger,
+            "Document RAG question failed",
+            error,
+            event="document_rag_failed",
+            operation="rag_question",
+            entity_type="document",
+            entity_id=document.id,
+        )
 
         raise HTTPException(
             status_code=502,
@@ -344,16 +412,33 @@ def delete_document(
         db.delete(document)
         db.commit()
 
-        return {
-            "message": "Document deleted successfully",
-            "document_id": document_id
-        }
-
-    except Exception as e:
+    except Exception as error:
         db.rollback()
-        print("DOCUMENT DELETE ERROR:", repr(e))
+        log_exception(
+            logger,
+            "Document deletion failed",
+            error,
+            event="document_delete_failed",
+            operation="delete",
+            entity_type="document",
+            entity_id=document_id,
+        )
 
         raise HTTPException(
             status_code=500,
             detail="Document deletion failed"
         )
+
+    logger.info(
+        "Document deleted",
+        extra={
+            "event": "document_delete_succeeded",
+            "operation": "delete",
+            "entity_type": "document",
+            "entity_id": document_id,
+        },
+    )
+    return {
+        "message": "Document deleted successfully",
+        "document_id": document_id
+    }

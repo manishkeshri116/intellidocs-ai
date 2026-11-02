@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
@@ -12,6 +14,7 @@ router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
 )
+logger = logging.getLogger("app.auth")
 
 
 @router.get("/me", response_model=UserResponse)
@@ -32,6 +35,10 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     ).first()
 
     if existing_user:
+        logger.warning(
+            "Account registration rejected",
+            extra={"event": "auth_signup_rejected", "operation": "signup"},
+        )
         raise HTTPException(
             status_code=400,
             detail="Email already registered"
@@ -46,6 +53,10 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    logger.info(
+        "Account registered",
+        extra={"event": "auth_signup_succeeded", "operation": "signup"},
+    )
 
     return new_user
 
@@ -62,6 +73,10 @@ def login(
         form_data.password,
         user.hashed_password
     ):
+        logger.warning(
+            "Authentication failed",
+            extra={"event": "auth_login_failed", "operation": "login"},
+        )
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password"
@@ -69,6 +84,10 @@ def login(
 
     access_token = create_access_token(
         data={"sub": str(user.id)}
+    )
+    logger.info(
+        "Authentication succeeded",
+        extra={"event": "auth_login_succeeded", "operation": "login"},
     )
 
     return {

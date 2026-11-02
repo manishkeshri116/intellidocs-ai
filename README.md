@@ -34,9 +34,17 @@ intellidocs-ai/
    ```dotenv
    GEMINI_API_KEY=your_gemini_api_key
    SECRET_KEY=replace_with_a_long_random_secret
+   APP_ENV=development
+   LOG_LEVEL=INFO
+   LOG_FORMAT=auto
+   LOG_DIR=logs
+   LOG_MAX_BYTES=10485760
+   LOG_BACKUP_COUNT=5
    ```
 
    Keep this file private; it is excluded from Git.
+
+   Logging variables can also be supplied through the process environment. `LOG_FORMAT=auto` uses readable console output in development and JSON in production (`APP_ENV=production`). Set `LOG_FORMAT` to `json` or `text` to override that choice. Logs rotate at the configured size and retain the configured number of backups; the default log directory is `backend/logs/` when running commands from `backend/`.
 
 4. Apply database migrations and start the API:
 

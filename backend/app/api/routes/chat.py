@@ -8,6 +8,7 @@ from fastapi import (
     Depends
 )
 import json
+import logging
 import os
 
 from google.genai import types
@@ -26,6 +27,7 @@ from app.services.gemini_service import (
 )
 
 from app.core.security import get_current_user
+from app.core.logging import log_exception
 from app.models.user import User
 
 from sqlalchemy.orm import Session
@@ -36,6 +38,7 @@ router = APIRouter(
     prefix="/chat",
     tags=["AI Chat"]
 )
+logger = logging.getLogger("app.chat")
 
 @router.post("/", response_model=ChatResponse)
 def chat_with_ai(
@@ -80,6 +83,14 @@ def chat_with_ai(
         db.add(assistant_message)
         db.commit()
 
+        logger.info(
+            "Chat response persisted",
+            extra={
+                "event": "chat_turn_succeeded",
+                "operation": "chat",
+                "conversation_id": conversation.id,
+            },
+        )
         return ChatResponse(
             conversation_id=conversation.id,
             question=request.message,
@@ -89,9 +100,15 @@ def chat_with_ai(
     except HTTPException:
         db.rollback()
         raise
-    except Exception as e:
+    except Exception as error:
         db.rollback()
-        print("GEMINI ERROR:", repr(e))
+        log_exception(
+            logger,
+            "Chat request failed",
+            error,
+            event="chat_turn_failed",
+            operation="chat",
+        )
         raise HTTPException(
             status_code=502,
             detail="AI chat failed. Check backend terminal."
@@ -222,6 +239,15 @@ def chat_with_files(
         ))
         db.commit()
 
+        logger.info(
+            "File chat response persisted",
+            extra={
+                "event": "file_chat_turn_succeeded",
+                "operation": "file_chat",
+                "conversation_id": conversation.id,
+                "attachment_count": len(validated_files),
+            },
+        )
         return FileChatResponse(
             conversation_id=conversation.id,
             question=message,
@@ -232,9 +258,16 @@ def chat_with_files(
     except HTTPException:
         db.rollback()
         raise
-    except Exception as e:
+    except Exception as error:
         db.rollback()
-        print("FILE CHAT ERROR:", repr(e))
+        log_exception(
+            logger,
+            "File chat request failed",
+            error,
+            event="file_chat_turn_failed",
+            operation="file_chat",
+            attachment_count=len(validated_files),
+        )
 
         raise HTTPException(
             status_code=502,

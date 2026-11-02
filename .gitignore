@@ -9,6 +9,8 @@
 **/.venv/
 backend/venv/
 .pytest_cache/
+**/logs/
+*.log
 
 # Runtime data and local databases
 backend/uploads/

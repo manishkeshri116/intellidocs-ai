@@ -1,11 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.exc import SQLAlchemyError
 
 DATABASE_URL = "postgresql+psycopg://localhost:5432/intellidocs_db"
 
 engine = create_engine(
     DATABASE_URL,
-    echo=True
+    echo=False
 )
 
 SessionLocal = sessionmaker(
@@ -23,5 +24,8 @@ def get_db():
 
     try:
         yield db
+    except SQLAlchemyError:
+        db.rollback()
+        raise
     finally:
         db.close()

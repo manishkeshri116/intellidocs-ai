@@ -1,19 +1,57 @@
+import logging
+import time
+
 from google import genai
 from app.core.config import settings
+from app.core.logging import log_exception
 from google.genai import types
+
+logger = logging.getLogger("app.gemini")
 
 client = genai.Client(
     api_key=settings.GEMINI_API_KEY,
     http_options={"timeout": 15000}
 )
 
-def generate_ai_response(prompt: str) -> str:
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=prompt
-    )
 
-    return response.text or "No response generated."
+def _generate_content(
+    operation: str,
+    contents: str | list,
+    attachment_count: int | None = None,
+) -> str | None:
+    started = time.perf_counter()
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.5-flash-lite",
+            contents=contents,
+        )
+    except Exception as error:
+        log_exception(
+            logger,
+            "Gemini generation failed",
+            error,
+            event="gemini_request_failed",
+            operation=operation,
+            duration_ms=round((time.perf_counter() - started) * 1000, 2),
+        )
+        raise
+
+    event_fields = {
+        "event": "gemini_request_succeeded",
+        "operation": operation,
+        "duration_ms": round((time.perf_counter() - started) * 1000, 2),
+    }
+    if attachment_count is not None:
+        event_fields["attachment_count"] = attachment_count
+    logger.info(
+        "Gemini generation completed",
+        extra=event_fields,
+    )
+    return response.text
+
+
+def generate_ai_response(prompt: str) -> str:
+    return _generate_content("general_chat", prompt) or "No response generated."
 
 def generate_document_summary(document_text: str) -> str:
     prompt = f"""
@@ -33,12 +71,7 @@ def generate_document_summary(document_text: str) -> str:
     {document_text}
     """
 
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=prompt
-    )
-
-    return response.text or "Summary could not be generated."
+    return _generate_content("document_summary", prompt) or "Summary could not be generated."
 
 def ask_document_question(
     document_text: str,
@@ -62,26 +95,33 @@ def ask_document_question(
     {question}
     """
 
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=prompt
-    )
-
-    return response.text or "No answer generated."
+    return _generate_content("document_question", prompt) or "No answer generated."
 
 def generate_embedding(
     text: str,
     task_type: str = "RETRIEVAL_DOCUMENT"
 ) -> list[float]:
 
-    response = client.models.embed_content(
-        model="gemini-embedding-001",
-        contents=text,
-        config=types.EmbedContentConfig(
-            task_type=task_type,
-            output_dimensionality=768
+    started = time.perf_counter()
+    try:
+        response = client.models.embed_content(
+            model="gemini-embedding-001",
+            contents=text,
+            config=types.EmbedContentConfig(
+                task_type=task_type,
+                output_dimensionality=768
+            )
         )
-    )
+    except Exception as error:
+        log_exception(
+            logger,
+            "Gemini embedding failed",
+            error,
+            event="gemini_embedding_failed",
+            operation="embedding",
+            duration_ms=round((time.perf_counter() - started) * 1000, 2),
+        )
+        raise
 
     return response.embeddings[0].values
 
@@ -115,12 +155,7 @@ def generate_rag_answer(
     ANSWER:
     """
 
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=prompt
-    )
-
-    return response.text or "No answer generated."
+    return _generate_content("rag_answer", prompt) or "No answer generated."
 
 
 def generate_file_chat_response(
@@ -149,9 +184,8 @@ def generate_file_chat_response(
 
     contents = [prompt, *file_parts]
 
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=contents
-    )
-
-    return response.text or "No response generated."
+    return _generate_content(
+        "file_chat",
+        contents,
+        attachment_count=len(file_parts),
+    ) or "No response generated."
